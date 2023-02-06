@@ -1,30 +1,80 @@
-const express = require('express');
+
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-const cTable = require('console.table');
+ require('console.table');
 
 function init() {
   inquirer
-  .prompt([type: "list",
-  name: "Departments",
-  message: "Please select what you would like to review",
-  choices: [
-  "View all Departments",
-  "View all Roles",
-  "View all Employees",
-  ]
-])
-},
+    .prompt([
+      {
+        type: "list",
+        name: "Departments",
+        message: "Please select what you would like to review",
+        choices: [
+          "View all Departments",
+          "View all Roles",
+          "View all Employees",
+          "Exit App"
+        ]
+      }
+    ]).then((response) => {
 
-.then((response) => {}
+         switch(response.Departments){
+          case "View all Departments":
+              viewDepartments();
+              break;
+          case "View all Employees":
+              viewEmployee();
+              break;
+          case "View all Roles":
+              viewRoles();
+              break;
+          case "Add Department":
+              addDepartment();
+              break;
+          case "Add Employee":
+              addEmployee();
+              break;
+          case "Add Role":
+              addRole();
+              break;
+
+          default:
+            db.end()
+           process.exit(0)
+
+         }
+    })
+}
+
+function viewDepartments(){
+  db.query("Select * from department;",function(err,rows){
+    if(err) throw err;
+    console.table(rows);
+    init()
+  })
+}
+
+function viewRoles(){
+  db.query("select e.first_name,e.last_name, r.title,r.salary, d.department_name from employee e left join role r on e.role_id = r.id left join department d on r.department_id = d.id order by d.department_name, r.title;;",
+  function(err,rows){
+    if(err) throw err;
+    console.table(rows);
+    init()
+  })
+}
 
 
-const PORT = process.env.PORT || 3001;
-const app = express();
+function viewEmployee(){
+  db.query
+  ("select e.first_name,e.last_name, r.title,r.salary, d.department_name, m.first_name AS 'Manager FirstName', m.last_name AS 'Manager Last name' from employee e  left join role r on e.role_id = r.id  left join department d on r.department_id = d.id   left join employee m on e.manager_id = m.id  order by e.last_name;",
+  function(err,rows){
+    if(err) throw err;
+    console.table(rows);
+    init()
+  })
+}
 
-// Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 // Connect to database
 const db = mysql.createConnection(
@@ -35,131 +85,23 @@ const db = mysql.createConnection(
     // TODO: Add MySQL password here
     password: '',
     database: 'employees_db'
-  },
-  console.log(`Connected to the employees_db database.`)
-);
-
-// Create a department
-app.post('/api/new-department', ({ body }, res) => {
-  const sql = `INSERT INTO department (department_name)
-    VALUES (?)`;
-  const params = [body.department_name];
-  
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({
-      message: 'success',
-      data: body
-    });
-  });
-});
-
-// Create a role
-app.post('/api/new-role', ({ body }, res) => {
-  const sql = `INSERT INTO role (role_title)
-    VALUES (?)`;
-  const params = [body.department_name];
-  
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({
-      message: 'success',
-      data: body
-    });
-  });
-});
+  })
+db.connect(function () {
+  console.log('Welcome to Employee tracker')
+  init()
+})
 
 
-// Create an employee
-app.post('/api/new-employee', ({ body }, res) => {
-  const sql = `INSERT INTO role (employee_first_name)
-    VALUES (?)`;
-  const params = [body.department_name];
-  
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({
-      message: 'success',
-      data: body
-    });
-  });
-});
 
-// View all Departments
 
-app.get('/api/department', (req, res) => {
-  const sql = `SELECT id, department_name AS department FROM department`;
-  
-  db.query(sql, (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-       return;
-    }
-    res.json({
-      message: 'success',
-      data: rows
-    });
-  });
-});
 
-// Update department
-app.put('/api/department/:id', (req, res) => {
-  const sql = `UPDATE department SET department = ? WHERE id = ?`;
-  const params = [req.body.review, req.params.id];
 
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-    } else if (!result.affectedRows) {
-      res.json({
-        message: 'department not found'
-      });
-    } else {
-      res.json({
-        message: 'success',
-        data: req.body,
-        changes: result.affectedRows
-      });
-    }
-  });
-});
 
-// Delete a department
-app.delete('/api/department/:id', (req, res) => {
-  const sql = `DELETE FROM department WHERE id = ?`;
-  const params = [req.params.id];
-  
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.statusMessage(400).json({ error: res.message });
-    } else if (!result.affectedRows) {
-      res.json({
-      message: 'department not found'
-      });
-    } else {
-      res.json({
-        message: 'deleted',
-        changes: result.affectedRows,
-        id: req.params.id
-      });
-    }
-  });
-});
 
-// Default response for any other request (Not Found)
-app.use((req, res) => {
-  res.status(404).end();
-});
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+
+
+
+
+
