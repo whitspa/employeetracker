@@ -14,6 +14,10 @@ function init() {
           "View all Departments",
           "View all Roles",
           "View all Employees",
+          "Add a Department",
+          "Add a Role",
+          "Add an Employee",
+          "Update Employe Role"
           "Exit App"
         ]
       }
@@ -37,6 +41,9 @@ function init() {
               break;
           case "Add Role":
               addRole();
+              break;
+          case "Update Employee Role":
+              updateEmployeeRole();
               break;
 
           default:
@@ -67,13 +74,54 @@ function viewRoles(){
 
 function viewEmployee(){
   db.query
-  ("select e.first_name,e.last_name, r.title,r.salary, d.department_name, m.first_name AS 'Manager FirstName', m.last_name AS 'Manager Last name' from employee e  left join role r on e.role_id = r.id  left join department d on r.department_id = d.id   left join employee m on e.manager_id = m.id  order by e.last_name;",
+  ("select e.id,e.first_name,e.last_name, r.title,r.salary, d.department_name, m.first_name AS 'Manager FirstName', m.last_name AS 'Manager Last name' from employee e  left join role r on e.role_id = r.id  left join department d on r.department_id = d.id   left join employee m on e.manager_id = m.id  order by e.last_name;",
   function(err,rows){
     if(err) throw err;
     console.table(rows);
     init()
   })
 }
+
+function addDepartment(){
+  db.query
+  ("insert into department d.department_name values ("Accounting");"
+  function(err,rows){
+    if(err) throw err;
+    console.table(rows);
+    init()
+  })
+}
+
+function addRole(){
+  db.query
+  ("insert into role(r.title,r.salary,d.department_name)values";,
+  function(err,rows){
+    if(err) throw err;
+    console.table(rows);
+    init()
+  })
+}
+
+function addEmployee(){
+  db.query
+  ("insert into employee (e.first_name,e.last_name,r.title,m.first_name,m.last_name)values;"
+  function(err,rows){
+    if(err) throw err;
+    console.table(rows);
+    init()
+  })
+}
+
+function updateEmployeeRole(){
+  db.query
+  (")values;"
+  function(err,rows){
+    if(err) throw err;
+    console.table(rows);
+    init()
+  })
+}
+
 
 
 // Connect to database
