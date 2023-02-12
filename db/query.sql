@@ -8,7 +8,6 @@ left join department d on r.department_id = d.id
 order by d.department_name, r.title;
 
 
-
 select * from employee;
 
 
@@ -21,3 +20,7 @@ left join role r on e.role_id = r.id
 left join department d on r.department_id = d.id
 left join employee m on e.manager_id = m.id
 order by e.last_name;
+
+INSERT INTO department (department_name)
+  VALUES ("Accounting");
+  
