@@ -1,7 +1,7 @@
 
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
- require('console.table');
+require('console.table');
 
 function init() {
   inquirer
@@ -14,112 +14,194 @@ function init() {
           "View all Departments",
           "View all Roles",
           "View all Employees",
-          "Add a Department",
-          "Add a Role",
-          "Add an Employee",
-          "Update Employe Role"
-          "Exit App"
+          "Add Department",
+          "Add Role",
+          "Add Employee",
+          "Update Employe Role",
+          "Exit App",
         ]
       }
     ]).then((response) => {
 
-         switch(response.Departments){
-          case "View all Departments":
-              viewDepartments();
-              break;
-          case "View all Employees":
-              viewEmployee();
-              break;
-          case "View all Roles":
-              viewRoles();
-              break;
-          case "Add Department":
-              addDepartment();
-              break;
-          case "Add Employee":
-              addEmployee();
-              break;
-          case "Add Role":
-              addRole();
-              break;
-          case "Update Employee Role":
-              updateEmployeeRole();
-              break;
+      switch (response.Departments) {
+        case "View all Departments":
+          viewDepartments();
+          break;
+        case "View all Employees":
+          viewEmployee();
+          break;
+        case "View all Roles":
+          viewRoles();
+          break;
+        case "Add Department":
+          addDepartment();
+          break;
+        case "Add Employee":
+          addEmployee();
+          break;
+        case "Add Role":
+          addRole();
+          break;
+        case "Update Employee Role":
+          updateEmployeeRole();
+          break;
 
-          default:
-            db.end()
-           process.exit(0)
+        default:
+          db.end()
+          process.exit(0)
 
-         }
+      }
     })
 }
 
-function viewDepartments(){
-  db.query("Select * from department;",function(err,rows){
-    if(err) throw err;
+function viewDepartments() {
+  db.query("Select * from department;", function (err, rows) {
+    if (err) throw err;
     console.table(rows);
     init()
   })
 }
 
-function viewRoles(){
-  db.query("select e.first_name,e.last_name, r.title,r.salary, d.department_name from employee e left join role r on e.role_id = r.id left join department d on r.department_id = d.id order by d.department_name, r.title;;",
-  function(err,rows){
-    if(err) throw err;
-    console.table(rows);
-    init()
-  })
+function viewRoles() {
+  db.query("select  r.title,r.salary, d.department_name from role r  left join department d on r.department_id = d.id order by d.department_name, r.title;",
+    function (err, rows) {
+      if (err) throw err;
+      console.table(rows);
+      init()
+    })
 }
 
 
-function viewEmployee(){
+function viewEmployee() {
   db.query
-  ("select e.id,e.first_name,e.last_name, r.title,r.salary, d.department_name, m.first_name AS 'Manager FirstName', m.last_name AS 'Manager Last name' from employee e  left join role r on e.role_id = r.id  left join department d on r.department_id = d.id   left join employee m on e.manager_id = m.id  order by e.last_name;",
-  function(err,rows){
-    if(err) throw err;
-    console.table(rows);
-    init()
+    ("select e.id,e.first_name,e.last_name, r.title,r.salary, d.department_name, m.first_name AS 'Manager FirstName', m.last_name AS 'Manager Last name' from employee e  left join role r on e.role_id = r.id  left join department d on r.department_id = d.id   left join employee m on e.manager_id = m.id  order by e.last_name;",
+      function (err, rows) {
+        if (err) throw err;
+        console.table(rows);
+        init()
+      })
+}
+
+function addDepartment() {
+  inquirer.prompt([{
+    type: "input",
+    message: "department name",
+    name: "department_name"
+  }]).then(({ department_name }) => {
+
+
+    db.query
+      (`insert into department (department_name) values ("${department_name}");`,
+        function (err, rows) {
+          if (err) throw err;
+          console.table(rows);
+          init()
+        })
   })
 }
 
-function addDepartment(){
-  db.query
-  ("insert into department d.department_name values ("Accounting");"
-  function(err,rows){
-    if(err) throw err;
-    console.table(rows);
-    init()
+function addRole() {
+  let departmentList = []
+  db.query("select * from department;", function (err, data) {
+    data.forEach((department) => {
+      departmentList.push({ name: department.department_name, value: department.id })
+    })
+
+    inquirer.prompt([
+      {
+        type: "input",
+        message: "Please enter role title",
+        name: "title"
+      },
+      {
+        type: "input",
+        message: "Please enter role salary",
+        name: "salary"
+      },
+      {
+        type: "list",
+        message: "Please enter department",
+        name: "department_id",
+        choices: departmentList
+      },
+    ])
+      .then(({ title, salary, department_id }) => {
+
+
+        db.query
+          (`insert into role(title,salary,department_id) values ("${title}",${salary},${department_id});`,
+            function (err, rows) {
+              if (err) throw err;
+              console.table(rows);
+              init()
+            })
+      })
   })
 }
 
-function addRole(){
-  db.query
-  ("insert into role(r.title,r.salary,d.department_name)values";,
-  function(err,rows){
-    if(err) throw err;
-    console.table(rows);
-    init()
+function addEmployee() {
+  let rolesList = []
+  db.query("select * from role", function (err, data) {
+    if (err) throw err;
+    data.forEach(role => {
+      rolesList.push({ name: role.title, value: role.id })
+    })
+    let manageridList = []
+    db.query("select * from employee where manager_id is null;", function (err, data) {
+      if (err) throw err;
+      data.forEach(employee => {
+        manageridList.push({ name: employee.first_name + " , " + employee.last_name, value: employee.id })
+      })
+
+
+      inquirer.prompt([
+        {
+          type: "input",
+          message: "Please enter the employee first name",
+          name: "first_name"
+        },
+        {
+          type: "input",
+          message: "Please enter the employee last name",
+          name: "last_name"
+        },
+        {
+          type: "list",
+          message: "Please choose employee role",
+          name: "role_id",
+          choices: rolesList
+        },
+        {
+          type: "list",
+          message: "Please choose a manager id",
+          name: "manager_id",
+          choices: manageridList
+        },
+      ])
+        .then(({ first_name, last_name, role_id, manager_id }) => {
+
+
+          db.query
+
+            (`insert into employee (first_name,last_name,role_id,manager_id)values("${first_name}","${last_name}",${role_id},${manager_id});`,
+              function (err, rows) {
+                if (err) throw err;
+                console.table(rows);
+                init()
+              })
+        })
+    })
   })
 }
 
-function addEmployee(){
+function updateEmployeeRole() {
   db.query
-  ("insert into employee (e.first_name,e.last_name,r.title,m.first_name,m.last_name)values;"
-  function(err,rows){
-    if(err) throw err;
-    console.table(rows);
-    init()
-  })
-}
-
-function updateEmployeeRole(){
-  db.query
-  (")values;"
-  function(err,rows){
-    if(err) throw err;
-    console.table(rows);
-    init()
-  })
+    (")values;",
+      function (err, rows) {
+        if (err) throw err;
+        console.table(rows);
+        init()
+      })
 }
 
 
