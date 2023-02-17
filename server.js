@@ -17,7 +17,7 @@ function init() {
           "Add Department",
           "Add Role",
           "Add Employee",
-          "Update Employe Role",
+          "Update Employee Role",
           "Exit App",
         ]
       }
@@ -85,7 +85,7 @@ function viewEmployee() {
 function addDepartment() {
   inquirer.prompt([{
     type: "input",
-    message: "department name",
+    message: "please enter department name",
     name: "department_name"
   }]).then(({ department_name }) => {
 
@@ -180,9 +180,7 @@ function addEmployee() {
       ])
         .then(({ first_name, last_name, role_id, manager_id }) => {
 
-
           db.query
-
             (`insert into employee (first_name,last_name,role_id,manager_id)values("${first_name}","${last_name}",${role_id},${manager_id});`,
               function (err, rows) {
                 if (err) throw err;
@@ -195,13 +193,50 @@ function addEmployee() {
 }
 
 function updateEmployeeRole() {
-  db.query
-    (")values;",
-      function (err, rows) {
-        if (err) throw err;
-        console.table(rows);
-        init()
+  let employeeList = []
+  let rolesList = []
+  db.query("select * from employee;", function (err, data) {
+    if (err) throw err;
+    data.forEach(employee => {
+      employeeList.push({
+        value: employee.id,
+        name: `${employee.first_name} , ${employee.last_name}`
       })
+    })
+    db.query("select * from role;", function (err, data) {
+      if (err) throw err;
+      data.forEach(role => {
+        rolesList.push({ name: role.title, value: role.id })
+      })
+
+      inquirer.prompt([
+        {
+          type: "list",
+          message: "Please choose employee",
+          name: "employee_id",
+          choices: employeeList
+        },
+        {
+          type: "list",
+          message: "Please choose the new role",
+          name: "role_id",
+          choices: rolesList
+        }
+        // What's the user prompt? an employee to find? A list of employees from which to choose?
+        // message: "please enter the role_id? you would like to update",
+        // name: "role_id"
+
+      ]).then(({ role_id, employee_id }) => {
+        db.query
+          (`update employee set role_id = ${role_id} where id = ${employee_id};`,
+            function (err, rows) {
+              if (err) throw err;
+              console.table(rows);
+              init()
+            })
+      })
+    })
+  })
 }
 
 

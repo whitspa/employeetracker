@@ -21,6 +21,7 @@ left join department d on r.department_id = d.id
 left join employee m on e.manager_id = m.id
 order by e.last_name;
 
--- `update employee set role_id = ${role_id} where id = ${employee_id};`
+-- `update employee role
+set role_id = ${role_id} where id = ${employee_id};`
 -- role id
 -- employee id
