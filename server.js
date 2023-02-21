@@ -222,9 +222,6 @@ function updateEmployeeRole() {
           name: "role_id",
           choices: rolesList
         }
-        // What's the user prompt? an employee to find? A list of employees from which to choose?
-        // message: "please enter the role_id? you would like to update",
-        // name: "role_id"
 
       ]).then(({ role_id, employee_id }) => {
         db.query
@@ -241,13 +238,11 @@ function updateEmployeeRole() {
 
 
 
-// Connect to database
+
 const db = mysql.createConnection(
   {
     host: 'localhost',
-    // MySQL username,
     user: 'root',
-    // TODO: Add MySQL password here
     password: '',
     database: 'employees_db'
   })

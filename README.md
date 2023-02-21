@@ -56,9 +56,9 @@ This Content Management System (CMS) utilizes Node.js, Inquirer, and MySQLto man
   * Email Address: whitspa64@duck.com
 
 ## Link to the walkthrough video demonstrating the functionality of the app
+https://drive.google.com/file/d/1yv_eKQaRSSX0LX87qxeb6i4vWA8ETJmc/view
   
-  
-  
+ 
   A screen shot of the application is below:
 
 <img src="employeetrackerscreenshot.png"
